@@ -2,6 +2,7 @@ package com.shark.linkedInProject.postsService.service;
 
 import com.shark.linkedInProject.postsService.auth.AuthContextHolder;
 import com.shark.linkedInProject.postsService.client.ConnectionsServiceClient;
+import com.shark.linkedInProject.postsService.client.UploaderServiceClient;
 import com.shark.linkedInProject.postsService.dto.PersonDto;
 import com.shark.linkedInProject.postsService.dto.PostCreateRequestDto;
 import com.shark.linkedInProject.postsService.dto.PostDto;
@@ -12,8 +13,10 @@ import com.shark.linkedInProject.postsService.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,11 +30,17 @@ public class PostService {
     private final ModelMapper modelMapper;
     private final ConnectionsServiceClient connectionsServiceClient;
     private final KafkaTemplate<Long, PostCreated> postCreatedKafkaTemplate;
+    private final UploaderServiceClient uploaderServiceClient;
 
-    public PostDto createPost(PostCreateRequestDto postCreateRequestDto, Long userId) {
+    public PostDto createPost(PostCreateRequestDto postCreateRequestDto, MultipartFile file) {
+        Long userId = AuthContextHolder.getCurrentUserId();
         log.info("Creating post for user with Id: {}", userId);
+
+        ResponseEntity<String> imageUrl = uploaderServiceClient.uploadFile(file);
+
         Post post = modelMapper.map(postCreateRequestDto, Post.class);
         post.setUserId(userId);
+        post.setImageUrl(imageUrl.getBody());
         post = postRepository.save(post);
 
         List<PersonDto> personDtoList = connectionsServiceClient.getFirstDegreeConnections(userId);
