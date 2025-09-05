@@ -21,7 +21,7 @@ spec:
         - sh
         - -exc
         - |
-          export CLUSTER_ID="jZpLHaZESGqcyoeuUkB66g" && \
+          export CLUSTER_ID="wKXpuRkLR7-pX8TybljyNQ" && \
           export KAFKA_NODE_ID=${HOSTNAME##*-} 
           export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_NAME}.kafka:9092
           export KAFKA_CONTROLLER_QUORUM_VOTERS="0@kafka-0.kafka:29093,1@kafka-1.kafka:29093" 
